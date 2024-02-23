@@ -1,0 +1,28 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/profileFragment">
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.cleardrive.ProfileFragment"
+        android:label="fragment_profile"
+        app:icon="@drawable/baseline_person_24"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.cleardrive.HistoryFragment"
+        android:label="fragment_history"
+        app:icon="@drawable/baseline_history_24"
+        tools:layout="@layout/fragment_history" />
+
+    <fragment
+        android:id="@+id/aboutUsFragment"
+        android:name="com.example.cleardrive.AboutUsFragment"
+        android:label="fragment_about_us"
+        app:icon="@drawable/baseline_person_pin_24"
+        tools:layout="@layout/fragment_about_us" />
+
+</navigation>
