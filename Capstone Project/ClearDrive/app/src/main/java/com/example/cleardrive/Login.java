@@ -39,8 +39,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             }
             boolean isAuthenticated = dbHelper.checkUser(username, password);
             if (isAuthenticated) {
-                CustomDialog.showSuccessDialog(this, "Login successful");
-                startActivity(new Intent(Login.this, HomeActivity.class));
+                startActivity(new Intent(Login.this, HomeActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+
             } else {
                 CustomDialog.showErrorDialog(this, "Invalid username or password");
             }

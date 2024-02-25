@@ -2,7 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/profileFragment">
+    app:startDestination="@id/homeActivity">
+
+    <activity
+        android:id="@+id/homeActivity"
+        android:name="com.example.cleardrive.HomeActivity"
+        android:label="Home"
+        tools:layout="@layout/activity_home" />
 
     <fragment
         android:id="@+id/profileFragment"

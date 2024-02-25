@@ -65,7 +65,7 @@
             android:layout_height="100dp"
             android:layout_margin="20dp"
             android:layout_marginStart="5dp"
-            android:src="@drawable/user"
+            android:src="@drawable/user_mechanic"
             android:paddingStart="10dp"
             android:hint="Last Name"
             android:inputType="text" />

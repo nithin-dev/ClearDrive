@@ -18,6 +18,7 @@
         android:paddingStart="10dp"
         android:background="@drawable/rectangle_white"
         android:hint="Username"
+        android:text="nithin"
         android:inputType="text" />
 
     <EditText
@@ -28,6 +29,7 @@
         android:paddingStart="10dp"
         android:background="@drawable/rectangle_white"
         android:hint="Password"
+        android:text="123"
         android:inputType="textPassword" />
 
     <androidx.appcompat.widget.AppCompatButton
