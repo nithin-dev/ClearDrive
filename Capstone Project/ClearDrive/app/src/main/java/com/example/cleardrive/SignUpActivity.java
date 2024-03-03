@@ -27,6 +27,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     private void setListeners() {
         activitySignUpBinding.buttonSignup.setOnClickListener(this);
+        activitySignUpBinding.tvLogin.setOnClickListener(this);
     }
 
     @Override
@@ -55,5 +56,14 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 CustomDialog.showErrorDialog(this, "Error occurred,please try again !");
             }
         }
+        if (v.getId()==R.id.tvLogin){
+            startLoginActivityWithAnimation(new Intent(this, Login.class));
+
+        }
+    }
+
+    private void startLoginActivityWithAnimation(Intent intent) {
+        startActivity(intent);
+        overridePendingTransition(R.anim.flip_in, R.anim.flip_out);
     }
 }

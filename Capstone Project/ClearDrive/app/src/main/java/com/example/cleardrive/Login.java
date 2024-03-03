@@ -39,15 +39,25 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             }
             boolean isAuthenticated = dbHelper.checkUser(username, password);
             if (isAuthenticated) {
-                startActivity(new Intent(Login.this, HomeActivity.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                Intent intent = new Intent(Login.this, HomeActivity.class);
+                startActivityWithAnimation(intent);
 
             } else {
                 CustomDialog.showErrorDialog(this, "Invalid username or password");
             }
         } else if (v.getId() == R.id.tvCreateAccount) {
             // Redirect to the signup activity
-            startActivity(new Intent(Login.this, SignUpActivity.class));
+            startSignUpActivityWithAnimation(new Intent(Login.this, SignUpActivity.class));
         }
+    }
+
+    private void startSignUpActivityWithAnimation(Intent intent) {
+        startActivity(intent);
+        overridePendingTransition(R.anim.flip_in, R.anim.flip_out);
+    }
+
+    private void startActivityWithAnimation(Intent intent) {
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 }

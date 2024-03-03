@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:id="@+id/close"
+            android:src="@drawable/close">
+
+        </androidx.appcompat.widget.AppCompatImageView>
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvDialogTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ClearDrive"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:padding="16dp"
+            android:textStyle="bold" />
+
+        <!-- Mechanic Details -->
+        <TextView
+            android:id="@+id/tvMechanicDetailsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mechanic Details"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email" />
+
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Price" />
+
+        <!-- Owner Details -->
+        <TextView
+            android:id="@+id/tvOwnerDetailsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Owner Details"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etOwnerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Owner Name" />
+
+        <EditText
+            android:id="@+id/etOwnerAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Owner Address" />
+
+        <EditText
+            android:id="@+id/etMobileNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mobile Number" />
+
+        <!-- Vehicle Details -->
+        <TextView
+            android:id="@+id/tvVehicleDetailsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Details"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etCarMake"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Car Make" />
+
+        <EditText
+            android:id="@+id/etCarModel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Car Model" />
+
+        <EditText
+            android:id="@+id/etCarYear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Car Year" />
+
+       <androidx.appcompat.widget.AppCompatButton
+           android:layout_width="match_parent"
+           android:layout_height="40dp"
+           android:layout_marginTop="10dp"
+           android:text="send Email"
+           android:textColor="@color/white"
+           android:background="@color/orange">
+
+       </androidx.appcompat.widget.AppCompatButton>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

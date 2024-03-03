@@ -1,5 +1,6 @@
 package com.example.cleardrive;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.cleardrive.databinding.ActivitySearchMechanicsBinding;
 import com.example.cleardrive.databinding.DialogVehicleDetailsBinding;
+import com.example.cleardrive.databinding.QuoteDialogBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,24 +87,35 @@ public class SearchMechanicsActivity extends AppCompatActivity implements Mechan
 
     }
 
+    @SuppressLint("SetTextI18n")
     private void showMechanicDetailsDialog(Mechanic mechanic) {
         // Create a custom dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        DialogVehicleDetailsBinding dialogBinding = DialogVehicleDetailsBinding.inflate(getLayoutInflater());
-        builder.setView(dialogBinding.getRoot());
+        QuoteDialogBinding dialogBinding = QuoteDialogBinding.inflate(getLayoutInflater());
+        View dialogView = dialogBinding.getRoot();
+        builder.setView(dialogView);
 
-        // Initialize dialog views using view binding
-        dialogBinding.tvName.setText(mechanic.getName());
-        dialogBinding.tvEmail.setText(mechanic.getEmail());
-        dialogBinding.tvPrice.setText(String.valueOf(mechanic.getPrice()));
+        dialogBinding.tvName.setText("Name:"+mechanic.getName());
+        dialogBinding.tvEmail.setText("Email:"+mechanic.getEmail());
+        dialogBinding.tvPrice.setText("Amount:"+ mechanic.getPrice() +"$");
+
+//        dialogBinding.etOwnerName.setText(mechanic.getOwner().getName());
+//        dialogBinding.etOwnerAddress.setText(mechanic.getOwner().getAddress());
+//        dialogBinding.etMobileNumber.setText(mechanic.getOwner().getMobileNumber());
+
+//
+//        dialogBinding.etCarMake.setText(mechanic.getVehicle().getCarMake());
+//        dialogBinding.etCarModel.setText(mechanic.getVehicle().getCarModel());
+//        dialogBinding.etCarYear.setText(String.valueOf(mechanic.getVehicle().getCarYear()));
 
         // Create and show the dialog
         AlertDialog dialog = builder.create();
         dialog.show();
 
         // Close the dialog when the close button is clicked
-        dialogBinding.btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialogBinding.close.setOnClickListener(v -> dialog.dismiss());
     }
+
 }
 
 
