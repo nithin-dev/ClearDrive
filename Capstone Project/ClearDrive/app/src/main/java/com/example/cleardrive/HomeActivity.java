@@ -47,6 +47,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setListeners() {
         activityHomeBinding.btnGetStarted.setOnClickListener(this);
+        activityHomeBinding.imgChat.setOnClickListener(this);
     }
 
     // Method to load a fragment with animation
@@ -79,6 +80,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(getApplicationContext(), SearchMechanicsActivity.class);
                 startActivity(intent);
             }, 200);
+        }
+        if (v.getId() == R.id.imgChat){
+            Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+            startActivity(intent);
         }
     }
 }

@@ -2,4 +2,5 @@
     <string name="app_name">ClearDrive</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="google_maps_key">AIzaSyDywuyzzr3Tf5k-HDYgXd-ASsNjBvg8oh4</string>
 </resources>

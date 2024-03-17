@@ -119,8 +119,9 @@
        <androidx.appcompat.widget.AppCompatButton
            android:layout_width="match_parent"
            android:layout_height="40dp"
+           android:id="@+id/btnCalculateRate"
            android:layout_marginTop="10dp"
-           android:text="send Email"
+           android:text="Calculate Rate"
            android:textColor="@color/white"
            android:background="@color/orange">
 

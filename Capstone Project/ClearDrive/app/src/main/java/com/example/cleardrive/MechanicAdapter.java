@@ -1,5 +1,6 @@
 package com.example.cleardrive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,23 +13,23 @@ import java.util.List;
 
 public class MechanicAdapter extends RecyclerView.Adapter<MechanicAdapter.ViewHolder> {
     private static List<Mechanic> mechanics;
-    private Context context;
     private static OnItemClickListener listener;
 
     public MechanicAdapter(Context context, List<Mechanic> mechanics) {
-        this.context = context;
-        this.mechanics = mechanics;
+        MechanicAdapter.mechanics = mechanics;
     }
+
+    public static void setListener(OnItemClickListener listener) {
+        MechanicAdapter.listener = listener;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     public void setMechanics(List<Mechanic> mechanics) {
-        this.mechanics = mechanics;
+        MechanicAdapter.mechanics = mechanics;
         notifyDataSetChanged();
     }
     public interface OnItemClickListener {
         void onItemClick(Mechanic mechanic);
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
     }
 
     @NonNull
@@ -49,6 +50,12 @@ public class MechanicAdapter extends RecyclerView.Adapter<MechanicAdapter.ViewHo
         holder.email.setText(mechanic.getEmail());
 
         holder.textViewPrice.setText(String.valueOf(mechanic.getPrice()));
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(mechanic);
+            }
+        });
     }
 
     @Override

@@ -11,15 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomNavigationView"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true">
 
         <ImageView
             android:id="@+id/bg_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/bg"
-            android:scaleType="fitXY"
-             />
+            android:scaleType="fitXY" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnGetStarted"
@@ -35,6 +34,28 @@
             android:background="@drawable/rectangle_white"
             android:text="Get Started" />
     </FrameLayout>
+
+
+    <ImageView
+        android:id="@+id/imgChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tvChat"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="30dp"
+        android:src="@drawable/chaticon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottomNavigationView"
+        android:layout_alignParentEnd="true"
+        android:text="Chat with us"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:textColor="@android:color/white" />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
