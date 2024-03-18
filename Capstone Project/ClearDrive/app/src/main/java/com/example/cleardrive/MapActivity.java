@@ -1,19 +1,26 @@
 package com.example.cleardrive;
 
-
 import android.Manifest;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.cleardrive.databinding.ActivityMapBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,7 +33,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.cleardrive.databinding.ActivityMapBinding;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
 import com.google.maps.android.PolyUtil;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 
 import org.json.JSONArray;
@@ -34,15 +46,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback,View.OnClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final double RATE_PER_KILOMETER = 5.0;
+
     private GoogleMap mMap;
     private ActivityMapBinding binding;
 
@@ -51,6 +67,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         binding = ActivityMapBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setListeners();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.googleMap);
@@ -63,6 +80,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
+    }
+
+    private void setListeners() {
+        binding.btnRequestAppointment.setOnClickListener(this);
     }
 
     @Override
@@ -101,7 +122,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 .position(ownerLocation)
                 .title("Vehicle Owner"));
 
-        // Show info window for each marker
         assert mechanicMarker != null;
         mechanicMarker.showInfoWindow();
         ownerMarker.showInfoWindow();
@@ -113,22 +133,55 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.setOnMapLoadedCallback(() -> {
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
         });
+
+        double distanceInMeters = calculateDistance(mechanicLocation, ownerLocation);
+        double distanceInKms = distanceInMeters / 1000;
+        double amountInCAD = calculateAmount(distanceInKms);
+
+        showDialogWithDistanceAndAmount(distanceInKms, amountInCAD);
+
         drawRouteAndCalculateDistance(mechanicLocation, ownerLocation);
     }
 
+    private void showDialogWithDistanceAndAmount(double distanceInKms, double amountInCAD) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_curved, null);
+        builder.setView(dialogView);
+
+        TextView textViewMessage = dialogView.findViewById(R.id.textViewMessage);
+        double roundedDistance = Math.round(distanceInKms * 100.0) / 100.0;
+        double roundedAmount = Math.round(amountInCAD * 100.0) / 100.0;
+        String message = "Distance: " + roundedDistance + " km\n";
+        message += "Amount: CAD " + roundedAmount;
+        textViewMessage.setText(message);
+
+        Button btnOk = dialogView.findViewById(R.id.btnOk);
+        AlertDialog dialog = builder.create();
+
+        btnOk.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+
+        // Customize dialog appearance
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+    }
+
+
+    private double calculateAmount(double distanceInKms) {
+        return distanceInKms * RATE_PER_KILOMETER;
+    }
 
     private void drawRouteAndCalculateDistance(LatLng origin, LatLng destination) {
-        // Calculate distance between origin and destination
         double distanceInMeters = calculateDistance(origin, destination);
-        double distanceInKilometers = distanceInMeters / 1000;
-        binding.tvDistance.setText(String.format("%.2f km", distanceInKilometers));
+        double distanceInKms = distanceInMeters / 1000;
         String url = getDirectionsUrl(origin, destination);
         FetchDirectionsTask fetchDirectionsTask = new FetchDirectionsTask();
         fetchDirectionsTask.execute(url);
     }
 
     private double calculateDistance(LatLng origin, LatLng destination) {
-        // Radius of the earth in meters
         final int R = 6371 * 1000;
 
         double lat1 = origin.latitude;
@@ -136,11 +189,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         double lat2 = destination.latitude;
         double lon2 = destination.longitude;
 
-        // Calculate differences of latitude and longitude
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
 
-        // Haversine formula
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -158,6 +209,88 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         String apiKey = "AIzaSyBpGK9qDkc7q41ktvImskaqNr7_CUboT-Y";
         String url = "https://maps.googleapis.com/maps/api/directions/json?" + parameters + "&key=" + apiKey;
         return url;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId()==R.id.btnRequestAppointment){
+            SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            String quoteRequestJson = sharedPreferences.getString("quoteRequest", "");
+            QuoteRequest quoteRequest = new Gson().fromJson(quoteRequestJson, QuoteRequest.class);
+            if (quoteRequest != null) {
+                createAndSendPdf(quoteRequest);
+                saveQuoteRequestData(quoteRequest);
+
+            } else {
+                Toast.makeText(this, "data not found", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private void saveQuoteRequestData(QuoteRequest quoteRequest) {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String quoteRequestJson = gson.toJson(quoteRequest);
+        editor.putString("quoteRequest", quoteRequestJson);
+        editor.apply();
+    }
+
+    private void createAndSendPdf(QuoteRequest quoteRequest) {
+        try {
+            File pdfFile = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "quote_request.pdf");
+            Document document = new Document();
+            PdfWriter.getInstance(document, Files.newOutputStream(pdfFile.toPath()));
+            document.open();
+
+            // Add QuoteRequest data to the PDF
+            Font headingFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Paragraph heading = new Paragraph("Quote Request Details", headingFont);
+            document.add(heading);
+//            Paragraph mechanicName = new Paragraph("Mechanic Name: " + quoteRequest.getMechanicName());
+//            document.add(mechanicName);
+//            Paragraph mechanicEmail = new Paragraph("Mechanic Email: " + quoteRequest.getMechanicEmail());
+//            document.add(mechanicEmail);
+            Paragraph ownerName = new Paragraph("Owner Name: " + quoteRequest.getOwnerName());
+            document.add(ownerName);
+            Paragraph ownerAddress = new Paragraph("Owner Address: " + quoteRequest.getOwnerAddress());
+            document.add(ownerAddress);
+            Paragraph mobileNumber = new Paragraph("Mobile Number: " + quoteRequest.getMobileNumber());
+            document.add(mobileNumber);
+            Paragraph carMake = new Paragraph("Car Make: " + quoteRequest.getCarMake());
+            document.add(carMake);
+            Paragraph carModel = new Paragraph("Car Model: " + quoteRequest.getCarModel());
+            document.add(carModel);
+            Paragraph carYear = new Paragraph("Car Year: " + quoteRequest.getCarYear());
+            document.add(carYear);
+            Paragraph amountInCAD = new Paragraph("Amount in CAD: " + quoteRequest.getAmountInCAD());
+            document.add(amountInCAD);
+
+            document.close();
+
+            // Send the PDF via email
+            Uri fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfFile);
+            String deepLink = "https://gmail.com/PaymentActivity";
+            String emailContent = "Please find the details attached.\n\nDo you accept these quote?\n1. ACCEPTED\n2. REJECTED\n\n" + deepLink;
+
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("application/pdf");
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Quote Request Details PDF");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, emailContent);
+            emailIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{quoteRequest.getMechanicEmail()});
+            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            if (emailIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(emailIntent);
+            } else {
+                Toast.makeText(this, "No email app found.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class FetchDirectionsTask extends AsyncTask<String, Void, String> {
@@ -183,43 +316,5 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
             return data;
         }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            drawRoute(result);
-        }
-
-        private void drawRoute(String routeData) {
-            try {
-                JSONObject jsonObject = new JSONObject(routeData);
-                JSONArray routes = jsonObject.getJSONArray("routes");
-                JSONObject route = routes.getJSONObject(0);
-                JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
-                String encodedPolyline = overviewPolyline.getString("points");
-
-                List<LatLng> decodedPath = PolyUtil.decode(encodedPolyline);
-                PolylineOptions polylineOptions = new PolylineOptions().addAll(decodedPath).color(Color.BLUE).width(8);
-                mMap.addPolyline(polylineOptions);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
     }
-    private double parseRouteAndCalculateDistance(String routeData) {
-        double distance = 0;
-        try {
-            JSONObject jsonObject = new JSONObject(routeData);
-            JSONArray routes = jsonObject.getJSONArray("routes");
-            JSONObject route = routes.getJSONObject(0);
-            JSONArray legs = route.getJSONArray("legs");
-            JSONObject leg = legs.getJSONObject(0);
-            JSONObject distanceObject = leg.getJSONObject("distance");
-            distance = distanceObject.getDouble("value");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return distance;
-    }
-
 }

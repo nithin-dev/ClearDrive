@@ -1,10 +1,13 @@
 package com.example.cleardrive;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -16,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.cleardrive.databinding.ActivitySearchMechanicsBinding;
 import com.example.cleardrive.databinding.QuoteDialogBinding;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,15 +67,15 @@ public class SearchMechanicsActivity extends AppCompatActivity implements Mechan
 
     // Method to add sample mechanics data
     private void addSampleMechanics() {
-        mechanics.add(new Mechanic("Nithin Thomas", "11 Sitler Street", R.drawable.user_mechanic, 50.0, "N2K 1B3", "n@g.com", "111"));
-        mechanics.add(new Mechanic("George", "Waterloo", R.drawable.user_mechanic, 60.0, "N2L 3G1", "n@g.com", "111"));
-        mechanics.add(new Mechanic("Ashmi", "Kitchener", R.drawable.user_mechanic, 55.0, "N2M 4J5", "n@g.com", "111"));
+        mechanics.add(new Mechanic("Nithin Thomas", "11 Sitler Street", R.drawable.user_mechanic, 50.0, "N2K 1B3", "nithinthomasninan1996@gmail.com", "111"));
+        mechanics.add(new Mechanic("George", "Waterloo", R.drawable.user_mechanic, 60.0, "N2L 3G1", "nithinthomasninan1996@gmail.com", "111"));
+        mechanics.add(new Mechanic("Ashmi", "Kitchener", R.drawable.user_mechanic, 55.0, "N2M 4J5", "nithinthomasninan1996@gmail.com", "111"));
         mechanics.add(new Mechanic("Millie Bobbie Brown", "22 Elm Street", R.drawable.user_mechanic, 70.0, "N2K 1B3", "n@g.com", "111"));
         mechanics.add(new Mechanic("Sadie Sink", "33 Oak Street", R.drawable.user_mechanic, 65.0, "N2K 1B3", "n@g.com", "111"));
-        mechanics.add(new Mechanic("Michael Brown", "44 Maple Street", R.drawable.user_mechanic, 75.0, "N2K 1B3", "n@g.com", "111"));
-        mechanics.add(new Mechanic("Sarah Williams", "55 Pine Street", R.drawable.user_mechanic, 80.0, "N2L 3G1", "n@g.com", "111"));
-        mechanics.add(new Mechanic("David Miller", "66 Cedar Street", R.drawable.user_mechanic, 85.0, "N2M 4J5", "n@g.com", "111"));
-        mechanics.add(new Mechanic("Emma Wilson", "77 Birch Street", R.drawable.user_mechanic, 90.0, "N2L 3G1", "n@g.com", "111"));
+        mechanics.add(new Mechanic("Chandni", "44 Maple Street", R.drawable.user_mechanic, 75.0, "N2K 1B3", "n@g.com", "111"));
+        mechanics.add(new Mechanic("Tessa", "55 Pine Street", R.drawable.user_mechanic, 80.0, "N2L 3G1", "n@g.com", "111"));
+        mechanics.add(new Mechanic("Neel", "66 Cedar Street", R.drawable.user_mechanic, 85.0, "N2M 4J5", "n@g.com", "111"));
+        mechanics.add(new Mechanic("Emma Watson", "77 Birch Street", R.drawable.user_mechanic, 90.0, "N2L 3G1", "n@g.com", "111"));
     }
 
 
@@ -97,38 +101,99 @@ public class SearchMechanicsActivity extends AppCompatActivity implements Mechan
         showMechanicDetailsDialog(mechanic);
     }
 
-    // Show mechanic details dialog
-    // Show mechanic details dialog
     private void showMechanicDetailsDialog(Mechanic mechanic) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        QuoteDialogBinding dialogBinding = QuoteDialogBinding.inflate(getLayoutInflater());
+        QuoteDialogBinding dialogBinding = QuoteDialogBinding.inflate(LayoutInflater.from(this));
         View dialogView = dialogBinding.getRoot();
         builder.setView(dialogView);
 
         dialogBinding.tvName.setText("Name: " + mechanic.getName());
         dialogBinding.tvEmail.setText("Email: " + mechanic.getEmail());
-        dialogBinding.tvPrice.setText("Amount: " + mechanic.getPrice() + "$");
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
         dialogBinding.close.setOnClickListener(v -> dialog.dismiss());
         dialogBinding.btnCalculateRate.setOnClickListener(v -> {
-            LatLng mechanicLocation = getLatLngFromPinCode(mechanic.getPinCode());
-            LatLng ownerLocation = getLatLngFromAddress(dialogBinding.etOwnerAddress.getText().toString());
+            String ownerName = dialogBinding.etOwnerName.getText().toString().trim();
+            String ownerAddress = dialogBinding.etOwnerAddress.getText().toString().trim();
+            String mobileNumber = dialogBinding.etMobileNumber.getText().toString().trim();
+            String carMake = dialogBinding.etCarMake.getText().toString().trim();
+            String carModel = dialogBinding.etCarModel.getText().toString().trim();
+            String carYear = dialogBinding.etCarYear.getText().toString().trim();
 
-            if (mechanicLocation != null && ownerLocation != null) {
-                Intent intent = new Intent(SearchMechanicsActivity.this, MapActivity.class);
-                intent.putExtra("mechanicLatitude", mechanicLocation.latitude);
-                intent.putExtra("mechanicLongitude", mechanicLocation.longitude);
-                intent.putExtra("ownerLatitude", ownerLocation.latitude);
-                intent.putExtra("ownerLongitude", ownerLocation.longitude);
-                startActivity(intent);
+            if (TextUtils.isEmpty(ownerName) || TextUtils.isEmpty(ownerAddress) ||
+                    TextUtils.isEmpty(mobileNumber) || TextUtils.isEmpty(carMake) ||
+                    TextUtils.isEmpty(carModel) || TextUtils.isEmpty(carYear)) {
+                // If any of the fields are empty, display a toast message
+                CustomDialog.showErrorDialog(this, "Please fill in all details");
             } else {
-                Toast.makeText(SearchMechanicsActivity.this, "Unable to fetch coordinates", Toast.LENGTH_SHORT).show();
+                LatLng mechanicLocation = getLatLngFromPinCode(mechanic.getPinCode());
+                LatLng ownerLocation = getLatLngFromAddress(ownerAddress);
+
+                if (mechanicLocation != null && ownerLocation != null) {
+                    double distanceInKms = calculateDistanceInKms(mechanicLocation.latitude, mechanicLocation.longitude,
+                            ownerLocation.latitude, ownerLocation.longitude);
+                    double amountInCAD = calculateAmount(distanceInKms); // Calculate the amount based on the distance
+                    SharedPreferencesManager.saveAmountInCAD(SearchMechanicsActivity.this, (float) amountInCAD);
+
+
+                    Log.d("Distance", "Distance in kms: " + distanceInKms);
+                    Log.d("Amount", "Amount in CAD: " + amountInCAD);
+
+                    // Save the amount in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putFloat("amountInCAD", (float) amountInCAD);
+
+                    QuoteRequest quoteRequest = new QuoteRequest(
+                            mechanic.getName(),
+                            mechanic.getEmail(),
+                            ownerName,
+                            ownerAddress,
+                            mobileNumber,
+                            carMake,
+                            carModel,
+                            carYear,
+                            amountInCAD
+                    );
+                    editor.putString("quoteRequest", new Gson().toJson(quoteRequest));
+                    editor.apply();
+
+                    Intent intent = new Intent(SearchMechanicsActivity.this, MapActivity.class);
+                    intent.putExtra("mechanicLatitude", mechanicLocation.latitude);
+                    intent.putExtra("mechanicLongitude", mechanicLocation.longitude);
+                    intent.putExtra("ownerLatitude", ownerLocation.latitude);
+                    intent.putExtra("ownerLongitude", ownerLocation.longitude);
+                    startActivity(intent);
+                } else {
+                    CustomDialog.showErrorDialog(this, "Enter correct ZipCode");
+
+                }
             }
         });
     }
+
+
+    private double calculateAmount(double distanceInKms) {
+        return distanceInKms * 5.0;
+    }
+
+
+    private double calculateDistanceInKms(double latitude, double longitude, double latitude1, double longitude1) {
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(latitude1 - latitude);
+        double lonDistance = Math.toRadians(longitude1 - longitude);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(latitude)) * Math.cos(Math.toRadians(latitude1))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c; // convert to kilometers
+
+        return distance;
+    }
+
 
     // Fetch latitude and longitude from mechanic's pin code
     private LatLng getLatLngFromPinCode(String pinCode) {

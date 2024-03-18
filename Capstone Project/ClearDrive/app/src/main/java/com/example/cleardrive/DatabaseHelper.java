@@ -71,7 +71,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return count > 0;
     }
-
+    @SuppressLint("Range")
+    public UserModel getUserData(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_FIRST_NAME, COLUMN_LAST_NAME, COLUMN_MOBILE, COLUMN_EMAIL};
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+        Cursor cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+        UserModel userData = null;
+        if (cursor.moveToFirst()) {
+            userData = new UserModel();
+            userData.setFirstName(cursor.getString(cursor.getColumnIndex(COLUMN_FIRST_NAME)));
+            userData.setLastName(cursor.getString(cursor.getColumnIndex(COLUMN_LAST_NAME)));
+            userData.setMobile(cursor.getString(cursor.getColumnIndex(COLUMN_MOBILE)));
+            userData.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)));
+        }
+        cursor.close();
+        return userData;
+    }
     @SuppressLint("Range")
     public UserModel getUserData() {
         SQLiteDatabase db = this.getReadableDatabase();

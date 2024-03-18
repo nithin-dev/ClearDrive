@@ -71,19 +71,16 @@ public class ChatActivity extends AppCompatActivity {
             // Show loading animation
             binding.loadingAnimation.setVisibility(View.VISIBLE);
 
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (userMessage.equalsIgnoreCase("bye")) {
-                        conversationEnded = true;
-                        displayMessage("Have a good day!", false);
-                    } else {
-                        String botResponse = generateResponse(userMessage);
-                        displayMessage(botResponse, false);
-                    }
-                    // Hide loading animation
-                    binding.loadingAnimation.setVisibility(View.GONE);
+            handler.postDelayed(() -> {
+                if (userMessage.equalsIgnoreCase("bye")) {
+                    conversationEnded = true;
+                    displayMessage("Have a good day!", false);
+                } else {
+                    String botResponse = generateResponse(userMessage);
+                    displayMessage(botResponse, false);
                 }
+                // Hide loading animation
+                binding.loadingAnimation.setVisibility(View.GONE);
             }, 2000);
         }
     }
